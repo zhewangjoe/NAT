@@ -1,0 +1,17 @@
+#!/bin/bash
+
+apt-get install --yes build-essential zlib1g zlib1g-dev libreadline5 libreadline-gplv2-dev libssl-dev libsqlite3-dev libglib2.0-dev libyaml-dev
+wget ftp://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.3-p547.tar.gz
+tar zxvf ruby-1.9.3-p547.tar.gz
+cd ruby-1.9.3-p547/
+./configure --prefix=/usr/local/bin/ruby-1.9.3-p547 --enable-pthread --enable-shared
+make
+make install
+ln -s /usr/local/bin/ruby-1.9.3-p547/ /usr/local/bin/rubydir
+echo export 'PATH=/usr/local/bin/rubydir/bin:$PATH' >> /etc/bash.bashrc
+source /etc/bash.bashrc
+/usr/local/bin/rubydir/bin/gem update --system
+rm /usr/local/bin/rubydir/bin/rdoc
+rm /usr/local/bin/rubydir/bin/ri
+/usr/local/bin/rubydir/bin/gem install trema
+chmod -R go+w /usr/local/bin/ruby-1.9.3-p547/lib/ruby/gems/1.9.1/gems/trema-0.4.7/tmp

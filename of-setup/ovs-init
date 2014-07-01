@@ -1,0 +1,20 @@
+#!/bin/bash
+
+cd /opt/
+wget http://openvswitch.org/releases/openvswitch-1.9.3.tar.gz
+tar xvfz openvswitch-1.9.3.tar.gz
+cd openvswitch-1.9.3
+apt-get -y install pkg-config libssl-dev libc-dev
+./boot.sh
+./configure
+make
+make install
+mkdir -p /usr/local/etc/openvswitch
+ovsdb-tool create /usr/local/etc/openvswitch/conf.db vswitchd/vswitch.ovsschema
+ovsdb-server --remote=punix:/usr/local/var/run/openvswitch/db.sock \
+                     --remote=db:Open_vSwitch,manager_options \
+                     --private-key=db:SSL,private_key \
+                     --certificate=db:SSL,certificate \
+                     --bootstrap-ca-cert=db:SSL,ca_cert \
+                     --pidfile --detach
+ovs-vsctl --no-wait init

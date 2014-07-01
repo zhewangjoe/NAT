@@ -1,0 +1,14 @@
+#!/bin/bash
+
+cd /tmp/
+wget http://www.cs.rutgers.edu/~zhewang/nat.rb
+apt-get update
+cd /tmp/of-setup/
+$PWD/prep-trema
+#$PWD/ovs-init
+$PWD/ovs-start
+
+/usr/local/bin/rubydir/bin/ruby $PWD/find-interfaces.rb 192.168.128.1 192.168.129.1 | while read iface; do
+#    ifconfig $iface 0
+    ovs-vsctl add-port br0 $iface -- set interface $iface type=internal < /dev/null
+done
