@@ -10,7 +10,7 @@
     </sliver_type>
     <services>
       <execute command="sudo bash /tmp/of-setup/outside-setup" shell="bash"/>
-      <install install_path="/tmp" url="http://www.research.rutgers.edu/~zhewang/of-setup.tar.gz"/>
+      <install install_path="/tmp" url="http://www.research.rutgers.edu/~zhewang/NAT/of-setup.tar.gz"/>
     </services>
     <interface client_id="outside:switch">
       <ip address="10.10.10.2" netmask="255.255.255.0" type="ipv4"/>
@@ -23,7 +23,7 @@
     </sliver_type>
     <services>
       <execute command="sudo bash /tmp/of-setup/switch-setup" shell="bash"/>
-      <install install_path="/tmp" url="http://www.research.rutgers.edu/~zhewang/of-setup.tar.gz"/>
+      <install install_path="/tmp" url="http://www.research.rutgers.edu/~zhewang/NAT/of-setup.tar.gz"/>
     </services>
     <interface client_id="switch:outside">
       <ip address="192.168.129.1" netmask="255.255.255.0" type="ipv4"/>
