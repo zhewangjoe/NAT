@@ -12,12 +12,12 @@
       <execute command="sudo bash /tmp/of-setup/outside-setup" shell="bash"/>
       <install install_path="/tmp" url="http://www.research.rutgers.edu/~zhewang/NAT/of-setup.tar.gz"/>
     </services>
-    <interface client_id="outside:NAT">
+    <interface client_id="outside:switch">
       <ip address="10.10.10.2" netmask="255.255.255.0" type="ipv4"/>
     </interface>
     <flack:node_info x="100" y="400" unbound="true"/>
   </node>
-  <node client_id="NAT" exclusive="false">
+  <node client_id="switch" exclusive="false">
     <sliver_type name="emulab-xen">
       <disk_image name="urn:publicid:IDN+instageni.nysernet.org+image+emulab-ops:UBUNTU12-64-OVS"/>
     </sliver_type>
@@ -25,40 +25,55 @@
       <execute command="sudo bash /tmp/of-setup/switch-setup" shell="bash"/>
       <install install_path="/tmp" url="http://www.research.rutgers.edu/~zhewang/NAT/of-setup.tar.gz"/>
     </services>
-    <interface client_id="NAT:outside">
-      <ip address="10.10.10.1" netmask="255.255.255.0" type="ipv4"/>
+    <interface client_id="switch:outside">
+      <ip address="192.168.129.1" netmask="255.255.255.0" type="ipv4"/>
     </interface>
-    <interface client_id="NAT:inside">
+    <interface client_id="switch:router">
+      <ip address="192.168.128.1" netmask="255.255.255.0" type="ipv4"/>
+    </interface>
+    <flack:node_info x="450" y="400" unbound="true"/>
+  </node>
+  <node client_id="router" exclusive="false">
+    <sliver_type name="emulab-xen">
+      <disk_image name="urn:publicid:IDN+instageni.nysernet.org+image+emulab-ops:UBUNTU12-64-STD"/>
+    </sliver_type>
+    <interface client_id="router:inside">
       <ip address="192.168.0.1" netmask="255.255.255.0" type="ipv4"/>
     </interface>
-    <flack:node_info x="500" y="400" unbound="true"/>
+    <interface client_id="router:switch">
+      <ip address="10.10.10.1" netmask="255.255.255.0" type="ipv4"/>
+    </interface>
+    <flack:node_info x="800" y="400" unbound="true"/>
   </node>
   <node client_id="inside1" exclusive="false">
     <sliver_type name="emulab-xen">
       <disk_image name="urn:publicid:IDN+instageni.nysernet.org+image+emulab-ops:UBUNTU12-64-STD"/>
     </sliver_type>
-    <interface client_id="inside1:NAT">
+    <interface client_id="inside1:router">
       <ip address="192.168.0.2" netmask="255.255.255.0" type="ipv4"/>
     </interface>
-    <flack:node_info x="1000" y="200" unbound="true"/>
+    <flack:node_info x="1250" y="200" unbound="true"/>
   </node>
   <node client_id="inside2" exclusive="false">
     <sliver_type name="emulab-xen">
       <disk_image name="urn:publicid:IDN+instageni.nysernet.org+image+emulab-ops:UBUNTU12-64-STD"/>
     </sliver_type>
-    <interface client_id="inside2:NAT">
+    <interface client_id="inside2:router">
       <ip address="192.168.0.3" netmask="255.255.255.0" type="ipv4"/>
     </interface>
-    <flack:node_info x="1000" y="600" unbound="true"/>
+    <flack:node_info x="1250" y="600" unbound="true"/>
   </node>
-  
-  <link client_id="outside-NAT">
-    <interface_ref client_id="outside:NAT"/>
-    <interface_ref client_id="NAT:outside"/>
+  <link client_id="outside-switch">
+    <interface_ref client_id="outside:switch"/>
+    <interface_ref client_id="switch:outside"/>
   </link>
-  <link client_id="inside-NAT">
-    <interface_ref client_id="inside1:NAT"/>
-    <interface_ref client_id="NAT:inside"/>
-    <interface_ref client_id="inside2:NAT"/>
+  <link client_id="switch-router">
+    <interface_ref client_id="router:switch"/>
+    <interface_ref client_id="switch:router"/>
+  </link>
+  <link client_id="inside-router">
+    <interface_ref client_id="inside1:router"/>
+    <interface_ref client_id="router:inside"/>
+    <interface_ref client_id="inside2:router"/>
   </link>
 </rspec>

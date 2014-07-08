@@ -54,6 +54,13 @@ class MyController < Controller
 		#puts "#{message.ipv4_saddr.to_s} to #{message.ipv4_daddr.to_s}"
 		src_match = Match.new( :nw_src => "192.168.0.0/24" )
 		dst_match = Match.new( :nw_dst => @ex_ip )
+		
+		if message.in_port == OFPP_LOCAL
+			out_port = 1
+        else
+            out_port = OFPP_LOCAL
+        end
+		
 		if message.tcp? || message.udp?
 			if src_match.compare( ExactMatch.from( message ) )
 				#puts "convert src"
@@ -75,7 +82,7 @@ class MyController < Controller
 				action = [
 						SetIpSrcAddr.new( @ex_ip ),
 						SetTransportSrcPort.new(port),
-						ActionOutput.new( :port => OFPP_FLOOD )
+						SendOutPort.new(out_port)
 					]
 				packet_out datapath_id, message, action
 				return
@@ -96,7 +103,7 @@ class MyController < Controller
 				action = [
 						SetIpDstAddr.new( ipv4_addr.ipv4_saddr ),
 						SetTransportDstPort.new( ipv4_addr.ipv4_port ),
-                                                ActionOutput.new( :port => OFPP_FLOOD )
+                        SendOutPort.new(out_port)
                                         ]
 				packet_out datapath_id, message, action
 				return
@@ -114,7 +121,7 @@ class MyController < Controller
                                 end
                                 action = [
                                                 SetIpSrcAddr.new( @ex_ip ),
-                                                ActionOutput.new( :port => OFPP_FLOOD )
+                                                SendOutPort.new(out_port)
                                         ]
                                 packet_out datapath_id, message, action
                                 return
@@ -134,14 +141,14 @@ class MyController < Controller
 				end
                                 action = [
                                                 SetIpDstAddr.new( ipv4_addr ),
-                                                ActionOutput.new( :port => OFPP_FLOOD )
+                                                SendOutPort.new(out_port)
                                         ]
                                 packet_out datapath_id, message, action
                                 return
                         end
 		end
 
-		packet_out datapath_id, message, ActionOutput.new( :port => OFPP_FLOOD )
+		packet_out datapath_id, message, SendOutPort.new(out_port)
 	end
 
 	def packet_out(datapath_id, message, action)
