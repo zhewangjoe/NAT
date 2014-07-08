@@ -6,9 +6,26 @@ apt-get update
 cd /tmp/of-setup/
 $PWD/prep-trema
 #$PWD/ovs-init
-$PWD/ovs-start
+#$PWD/ovs-start
 
-/usr/local/bin/rubydir/bin/ruby $PWD/find-interfaces.rb 192.168.128.1 192.168.129.1 | while read iface; do
+#/usr/local/bin/rubydir/bin/ruby $PWD/find-interfaces.rb 192.168.128.1 192.168.129.1 | while read iface; do
 #    ifconfig $iface 0
-    ovs-vsctl add-port br0 $iface -- set interface $iface type=internal < /dev/null
-done
+#    ovs-vsctl add-port br0 $iface -- set interface $iface type=internal < /dev/null
+#done
+
+ovs-vsctl add-br OVS1
+ovs-vsctl add-port OVS1 eth1
+ovs-vsctl add-br OVS2
+ovs-vsctl add-port OVS2 eth2
+
+ifconfig OVS1 10.10.10.1/24 up
+ifconfig OVS2 192.168.0.1/24 up
+ifconfig eth1 0
+ifconfig eth2 0
+
+ovs-ofctl del-flows OVS1
+ovs-ofctl del-flows OVS2
+
+ovs-vsctl set-controller OVS1 tcp:127.0.0.1:6653 ptcp:6634:127.0.0.1
+ovs-ofctl add-flow OVS2 in_port=1,actions=output:65534
+ovs-ofctl add-flow OVS2 in_port=65534,actions=output:1
