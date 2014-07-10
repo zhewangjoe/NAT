@@ -25,6 +25,10 @@ class MyController < Controller
 			:match => Match.new( {:dl_type => dl_type_arp } ),
 			:actions => ActionOutput.new( OFPP_NORMAL ) 
 			)
+		send_flow_mod_add( datapath_id,
+                        :match => Match.new( {:dl_type => dl_type_ipv4, :nw_proto => 2 } ),
+                        :actions => ActionOutput.new( OFPP_NORMAL )
+                        )
 		send_flow_mod_add( datapath_id, 
 			:match => Match.new( {:dl_type => dl_type_ipv4, :nw_proto => 1 } ),
 			:actions => ActionOutput.new( OFPP_CONTROLLER ) 
