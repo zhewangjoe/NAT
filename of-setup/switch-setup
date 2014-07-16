@@ -14,7 +14,7 @@ $PWD/prep-trema
 #done
 
 ovs-vsctl add-br OVS1
-/usr/local/bin/rubydir/bin/ruby $PWD/find-interfaces.rb 10.10.10.1  | while read iface; do
+/usr/local/bin/rubydir/bin/ruby $PWD/find-interfaces.rb 128.128.128.1  | while read iface; do
     ifconfig $iface 0
     ovs-vsctl add-port OVS1 $iface 
 done
@@ -25,7 +25,7 @@ ovs-vsctl add-br OVS2
     ovs-vsctl add-port OVS2 $iface
 done
 
-ifconfig OVS1 10.10.10.1/24 up
+ifconfig OVS1 128.128.128.1/24 up
 ifconfig OVS2 192.168.0.1/24 up
 
 ovs-ofctl del-flows OVS1

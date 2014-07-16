@@ -13,7 +13,7 @@
       <install install_path="/tmp" url="http://www.research.rutgers.edu/~zhewang/NAT/of-setup.tar.gz"/>
     </services>
     <interface client_id="outside:switch">
-      <ip address="10.10.10.2" netmask="255.255.255.0" type="ipv4"/>
+      <ip address="128.128.128.2" netmask="255.255.255.0" type="ipv4"/>
     </interface>
     <flack:node_info x="100" y="400" unbound="true"/>
   </node>
@@ -41,7 +41,7 @@
       <ip address="192.168.0.1" netmask="255.255.255.0" type="ipv4"/>
     </interface>
     <interface client_id="router:switch">
-      <ip address="10.10.10.1" netmask="255.255.255.0" type="ipv4"/>
+      <ip address="128.128.128.1" netmask="255.255.255.0" type="ipv4"/>
     </interface>
     <flack:node_info x="800" y="400" unbound="true"/>
   </node>

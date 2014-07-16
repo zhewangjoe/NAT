@@ -8,7 +8,7 @@ class MyController < Controller
 	def start
 		@maps = Hash.new
 		@ports = *(50000..60000)
-		@ex_ip = "10.10.11.1"
+		@ex_ip = "128.128.129.1"
 	end
 
 	###################
