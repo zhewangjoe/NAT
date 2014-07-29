@@ -22,7 +22,7 @@
       <disk_image name="urn:publicid:IDN+instageni.nysernet.org+image+emulab-ops:UBUNTU12-64-OVS"/>
     </sliver_type>
     <services>
-      <execute command="sudo bash /tmp/of-setup/switch-setup" shell="bash"/>
+      <execute command="sudo bash /tmp/of-setup/switch-setup-ryu" shell="bash"/>
       <install install_path="/tmp" url="http://www.research.rutgers.edu/~zhewang/NAT/of-setup.tar.gz"/>
     </services>
     <interface client_id="NAT:outside">

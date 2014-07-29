@@ -5,10 +5,9 @@
 env
 
 cd /tmp/
-wget http://www.cs.rutgers.edu/~zhewang/NAT/nat.rb
 apt-get update
 cd /tmp/of-setup/
-$PWD/prep-trema
+$PWD/prep-ryu
 #$PWD/ovs-init
 #$PWD/ovs-start
 
@@ -18,13 +17,13 @@ $PWD/prep-trema
 #done
 
 ovs-vsctl add-br OVS1
-/usr/local/bin/rubydir/bin/ruby $PWD/find-interfaces.rb 128.128.128.1  | while read iface; do
+python $PWD/find-interfaces 128.128.128.1  | while read iface; do
     ifconfig $iface 0
     ovs-vsctl add-port OVS1 $iface 
 done
 
 ovs-vsctl add-br OVS2
-/usr/local/bin/rubydir/bin/ruby $PWD/find-interfaces.rb 192.168.0.1  | while read iface; do
+python $PWD/find-interfaces 192.168.0.1  | while read iface; do
     ifconfig $iface 0
     ovs-vsctl add-port OVS2 $iface
 done
@@ -35,7 +34,7 @@ ifconfig OVS2 192.168.0.1/24 up
 ovs-ofctl del-flows OVS1
 ovs-ofctl del-flows OVS2
 
-ovs-vsctl set-controller OVS1 tcp:127.0.0.1:6653 ptcp:6634:127.0.0.1
+ovs-vsctl set-controller OVS1 tcp:127.0.0.1:6633 ptcp:6634:127.0.0.1
 ovs-ofctl add-flow OVS2 in_port=1,actions=output:65534
 ovs-ofctl add-flow OVS2 in_port=65534,actions=output:1
 
