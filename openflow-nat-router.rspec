@@ -1,9 +1,9 @@
-<rspec type="request" generated_by="Flack" generated="2014-06-09T17:57:38Z"
-	xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/request.xsd "
+<rspec type="request" 
+	xsi:schemaLocation="http://www.geni.net/resources/rspec/3 http://www.geni.net/resources/rspec/3/request.xsd "
 	xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1"
 	xmlns:client="http://www.protogeni.net/resources/rspec/ext/client/1"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://www.protogeni.net/resources/rspec/2">
+	xmlns="http://www.geni.net/resources/rspec/3">
   <node client_id="outside" exclusive="false">
     <sliver_type name="emulab-xen">
       <disk_image name="urn:publicid:IDN+instageni.nysernet.org+image+emulab-ops:UBUNTU12-64-STD"/>
