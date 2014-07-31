@@ -10,6 +10,7 @@ from ryu.lib.packet import packet
 from ryu.lib.packet import ipv4
 from ryu.lib.packet import tcp
 from ryu.lib.packet import udp 
+from ryu.lib.packet import icmp
 from ryu.controller import dpset
 from netaddr import *
 from collections import namedtuple
@@ -44,52 +45,57 @@ class NAT(app_manager.RyuApp):
 	ofproto = dp.ofproto
         parser = dp.ofproto_parser
 	self.logger.info("switch connected %s", dp)
-
-	match = parser.OFPMatch(dl_type = dl_type_arp)
+	
+	# pass packet directly
 	actions = [parser.OFPActionOutput(ofproto.OFPP_NORMAL)]	
+
+	# arp
+	match = parser.OFPMatch(dl_type = dl_type_arp)
 
 	self.add_flow(dp, match, actions)
 	
+	# ipv6
 	match = parser.OFPMatch(dl_type = dl_type_ipv6)
 
 	self.add_flow(dp, match, actions)
 
+	# igmp
 	match = parser.OFPMatch(dl_type = dl_type_ipv4, nw_proto = 2)
 
 	self.add_flow(dp, match, actions)
 
+	# do address translation for following types of packet
 	actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER)]
 
+	# icmp
 	match = parser.OFPMatch(dl_type = dl_type_ipv4, nw_proto = 1)
 
 	self.add_flow(dp, match, actions)
 
+	# tcp
 	match = parser.OFPMatch(dl_type = dl_type_ipv4, nw_proto = 6)
 
 	self.add_flow(dp, match, actions)
 
+	# udp
 	match = parser.OFPMatch(dl_type = dl_type_ipv4, nw_proto = 17)
 
 	self.add_flow(dp, match, actions)
 
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
-	self.logger.info("msg in")
+	#self.logger.info("msg in")
 
 	message = ev.msg
-	self.logger.info("message %s", message)
+	#self.logger.info("message %s", message)
         datapath = message.datapath
         ofproto = datapath.ofproto
 	parser = datapath.ofproto_parser
 
         pkt = packet.Packet(message.data)
-	self.logger.info("pkt %s", pkt)
+	#self.logger.info("pkt %s", pkt)
 	ip = pkt.get_protocol(ipv4.ipv4)
-        self.logger.info("ipv4 %s", ip)
-	t = pkt.get_protocol(tcp.tcp)
-        self.logger.info("tcp %s", t)
-	u = pkt.get_protocol(udp.udp)
-        self.logger.info("udp %s", u)
+        #self.logger.info("ipv4 %s", ip)
 	
 
 	bitmask = "24"
@@ -102,11 +108,15 @@ class NAT(app_manager.RyuApp):
 		out_port = ofproto.OFPP_LOCAL
 
 	if ip.proto == 17 or ip.proto == 6 :
-		print "tcp or udp"
+		t = pkt.get_protocol(tcp.tcp)
+        	#self.logger.info("tcp %s", t)
+        	u = pkt.get_protocol(udp.udp)
+        	#self.logger.info("udp %s", u)
+
 		if IPNetwork( ip.src + "/" + bitmask ) == src_match :
-			print "convert src"
+			#print "convert src"
 			src_port = t.src_port if t else u.src_port
-			print src_port
+			#print src_port
 			ipv4_addr = Ipv4_addr(addr=ip.src , port=src_port)
 
 			if ipv4_addr in maps :
@@ -125,9 +135,9 @@ class NAT(app_manager.RyuApp):
         		datapath.send_msg(out)
 			return
 		elif ip.dst  == dst_match :
-			print "convert dst"
+			#print "convert dst"
                         dst_port = t.dst_port if t else u.dst_port
-                        print dst_port
+                        #print dst_port
 			
 			if dst_port in maps :
 				ipv4_addr = maps[dst_port]
@@ -143,13 +153,51 @@ class NAT(app_manager.RyuApp):
                         datapath.send_msg(out)
                         return
 
-
-
-
 	elif ip.proto == 1 :
-		print "icmp"
+		ping = pkt.get_protocol(icmp.icmp)
+        	#self.logger.info("icmp %s", ping)
+		
+		if IPNetwork( ip.src + "/" + bitmask ) == src_match :
+			#print "convert src"
+
+			icmp_id = ping.data.id
+			#print icmp_id
+
+			if not icmp_id in maps :
+				maps[icmp_id] = ip.src
+
+			actions = [
+                                parser.OFPActionSetNwSrc( self.ipv4_to_int(ex_ip) ),
+                                parser.OFPActionOutput(out_port)
+                                ]
+                        out = parser.OFPPacketOut(datapath=datapath, buffer_id=message.buffer_id, data=message.data, in_port=message.in_port,actions=actions)
+                        datapath.send_msg(out)
+                        return
+
+		elif ip.dst  == dst_match :
+			#print "convert dst"
+
+			icmp_id = ping.data.id
+                        #print icmp_id
+
+			if icmp_id in maps :
+				dst_addr = maps[icmp_id]
+			else :
+				print "Dropping msg as dst is not understood"
+				return
+						
+			actions = [
+                                parser.OFPActionSetNwDst( self.ipv4_to_int(dst_addr) ),
+                                parser.OFPActionOutput(out_port)
+                                ]
+                        out = parser.OFPPacketOut(datapath=datapath, buffer_id=message.buffer_id, data=message.data, in_port=message.in_port,actions=actions)
+                        datapath.send_msg(out)
+                        return
 	else:
-		print "other"
+		#print "other"
+		actions = [parser.OFPActionOutput(out_port)]
+                out = parser.OFPPacketOut(datapath=datapath, buffer_id=message.buffer_id, data=message.data, in_port=message.in_port,actions=actions)
+                datapath.send_msg(out)		
 
     def ipv4_to_str(self, integre):
 	ip_list = [str((integre >> (24 - (n * 8)) & 255)) for n in range(4)]
@@ -163,4 +211,3 @@ class NAT(app_manager.RyuApp):
     		b = int(b)
         	i = (i << 8) | b
         return i
-
